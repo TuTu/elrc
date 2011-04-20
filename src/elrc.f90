@@ -1,12 +1,11 @@
 !This program calculates the long-range corrections of LJ energy.
 MODULE molecule_type
-  REAL(KIND=8), PARAMETER :: PI = 3.141592653589793238  
   TYPE molecule
      CHARACTER(LEN=128) :: name     
      INTEGER :: num_site
      REAL(KIND=8) :: num_density
      REAL(KIND=8), ALLOCATABLE :: lj(:,:) !(sigma:epsilon,num_site)
-     LOGICAL :: is_solvent
+     LOGICAL :: is_solvent !only solvent has num_density, so far.
   END TYPE molecule
 END MODULE molecule_type
 
@@ -19,11 +18,11 @@ PROGRAM elrc
        REAL(KIND=8), INTENT(IN) :: a, b
      END FUNCTION geo_average
   END INTERFACE
-
+  REAL(KIND=8), PARAMETER :: PI = 3.141592653589793238  
   INTEGER, PARAMETER :: input_fileid = 10
   CHARACTER(LEN=128) :: input_filename = "input"
 
-  !These are just for NAMELIST I/O for TYPE(molecule)
+  !These variables are just for NAMELIST I/O for TYPE(molecule)
   !Because NAMELIST cannot deal with derived-type, yet
   CHARACTER(LEN=128) :: name
   INTEGER :: num_site
@@ -32,7 +31,8 @@ PROGRAM elrc
   LOGICAL :: is_solvent
   !------------------------------------
   
-  REAL(KIND=8), ALLOCATABLE :: e_lrc(:,:) !(num_slv_type:num_slt_type)
+  REAL(KIND=8), ALLOCATABLE :: e_lrc(:,:) !This is our GOAL 
+                              !e_lrc(num_slv_type:num_slt_type)
   INTEGER :: num_slv_type, num_slt_type
   REAL(KIND=8) :: r_switch, r_cutoff
   TYPE(molecule), ALLOCATABLE :: slv(:), slt(:)
@@ -53,7 +53,7 @@ PROGRAM elrc
      call EXIT(1)
   end if
 
-  !read general parameters
+  !read "general" parameters
   read(input_fileid, NML=general, IOSTAT=stat)
   if (stat /= 0) then
      write(*,*) 'Error: reading namelist "general" failed!'
@@ -69,6 +69,7 @@ PROGRAM elrc
   allocate(slt(num_slt_type))
   allocate(e_lrc(num_slv_type, num_slt_type))
 
+  !read "solvent"
   do i = 1, num_slv_type
      !read name and num_site
      read(input_fileid, NML=solvent, IOSTAT=stat)
@@ -93,6 +94,7 @@ PROGRAM elrc
      call output_molecule(slv(i))
   end do
 
+  !read "solute"
   do i = 1, num_slt_type
      !read name and num_site
      read(input_fileid, NML=solute, IOSTAT=stat)
@@ -148,6 +150,7 @@ PROGRAM elrc
 
 CONTAINS
   SUBROUTINE set_molecule(mol)
+    !set molecule info from NAMELIST variables
     IMPLICIT NONE
     TYPE(molecule), INTENT(OUT) :: mol
     mol%name = name
