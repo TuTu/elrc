@@ -1,12 +1,15 @@
 !lj = sigma(nm), epsilon(kJ/mol) 
 
-&general num_slv_type = 1,
+&general num_slv_type = 2,
 	 num_slt_type = 3,
 	 r_switch = 0.7,
 	 r_cutoff = 0.75,
 /
 
-&solvent name = "water", num_site = 1, num_density = 32.1773 /
+&solvent name = "water", num_site = 1, num_density = 3.29845809585 /
+&solvent lj = 0.315061, 0.6363864 /
+
+&solvent name = "water", num_site = 1, num_density = 3.29845809585 /
 &solvent lj = 0.315061, 0.6363864 /
 
 &solute name = "leucine", num_site = 14 /
