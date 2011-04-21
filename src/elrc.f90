@@ -19,6 +19,7 @@ PROGRAM elrc
      END FUNCTION geo_average
   END INTERFACE
   REAL(KIND=8), PARAMETER :: PI = 3.141592653589793238  
+  REAL(KIND=8), PARAMETER :: JoulePerCal = 4.184
   INTEGER, PARAMETER :: input_fileid = 10
   CHARACTER(LEN=128) :: input_filename = "input"
 
@@ -138,6 +139,7 @@ PROGRAM elrc
 
   
   !----- Output results -----!
+  write(*,*) "Unit: kJ/mol"
   write(*,"(10X)", ADVANCE='NO')
   do i = 1, num_slv_type
     if (i == num_slv_type) then
@@ -154,6 +156,29 @@ PROGRAM elrc
            write(*,"(1X,F15.6)") e_lrc(j, i)
         else
            write(*,"(1X,F15.6)", ADVANCE='NO') e_lrc(j, i)
+        end if
+     end do
+  end do
+  
+  write(*,*)
+
+  write(*,*) "Unit: kCal/mol"
+  write(*,"(10X)", ADVANCE='NO')
+  do i = 1, num_slv_type
+    if (i == num_slv_type) then
+      write(*,"(1X,A15)") TRIM(ADJUSTL(slv(i)%name))
+    else
+      write(*,"(1X,A15)", ADVANCE='NO') TRIM(ADJUSTL(slv(i)%name))
+    end if
+  end do
+
+  do i = 1, num_slt_type
+     write(*,"(A10)", ADVANCE='NO') TRIM(ADJUSTL(slt(i)%name))
+     do j = 1, num_slv_type
+        if (j == num_slv_type) then
+           write(*,"(1X,F15.6)") e_lrc(j, i)/JoulePerCal
+        else
+           write(*,"(1X,F15.6)", ADVANCE='NO') e_lrc(j, i)/JoulePerCal
         end if
      end do
   end do
@@ -226,19 +251,19 @@ CONTAINS
              term3 = 0.
              term4 = 0.
           else
-             term3_1 = -2/3 * (1/r_cutoff**3 - 1/r_switch**3)
+             term3_1 = -2.0d0/3.0d0 * (1/r_cutoff**3 - 1/r_switch**3)
              term3_2 = const3_2 / 5 * (1/r_cutoff**5 - 1/r_switch**5)
              term3_3 = -const3_3 / 7 * (1/r_cutoff**7 - 1/r_switch**7)
              term3_4 = -const3_4 / 9 * (1/r_cutoff**9 - 1/r_switch**9)
              term3 = -sig_12 / const3_0 * &
-                  (term3_1 + term3_2 + term3_3 + term3_4)
+                  &(term3_1 + term3_2 + term3_3 + term3_4)
              
-             term4_1 = -2/3 * (r_cutoff**3 - r_switch**3)
+             term4_1 = -2.0d0/3.0d0 * (r_cutoff**3 - r_switch**3)
              term4_2 = const3_2 * (r_cutoff - r_switch)
              term4_3 = const3_3 * (1/r_cutoff - 1/r_switch)
              term4_4 = const3_4 / 3 * (1/r_cutoff**3 - 1/r_switch**3)
              term4 = -sig_6 / const3_0 * &
-                  (term4_1 + term4_2 + term4_3 + term4_4)
+                  &(term4_1 + term4_2 + term4_3 + term4_4)
           end if
           
           e_lrc = e_lrc + const0 * eps * (term1 + term2 + term3 + term4)
