@@ -227,6 +227,7 @@ CONTAINS
     REAL(KIND=8) :: term3_1, term3_2, term3_3, term3_4
     REAL(KIND=8) :: term4_1, term4_2, term4_3, term4_4    
     REAL(KIND=8) :: const3_0, const3_2, const3_3, const3_4
+    REAL(KIND=8), PARAMETER :: conv_factor = 2.0d0**(-1.0d0/6.0d0)
 
     INTEGER :: i, j
 
@@ -241,7 +242,8 @@ CONTAINS
     e_lrc = 0.
     do i = 1, slv%num_site
        do j = 1, slt%num_site
-          sig = geo_average(slv%lj(1,i), slt%lj(1,j))    
+!          sig = geo_average(slv%lj(1,i), slt%lj(1,j))    
+          sig = conv_factor * (slv%lj(1,i) + slt%lj(1,j))    !for CHARMM
           eps = geo_average(slv%lj(2,i), slt%lj(2,j))
           sig_6 = sig**6
           sig_12 = sig_6 * sig_6
