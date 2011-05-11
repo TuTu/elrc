@@ -141,7 +141,30 @@ PROGRAM elrc
 
   
   !----- Output results -----!
-  write(*,*) "Unit: kJ/mol"
+!  write (*,*) "Unit: kJ/mol"
+!   write(*,"(10X)", ADVANCE='NO')
+!   do i = 1, num_slv_type
+!     if (i == num_slv_type) then
+!       write(*,"(1X,A15)") TRIM(ADJUSTL(slv(i)%name))
+!     else
+!       write(*,"(1X,A15)", ADVANCE='NO') TRIM(ADJUSTL(slv(i)%name))
+!     end if
+!   end do
+
+!   do i = 1, num_slt_type
+!      write(*,"(A10)", ADVANCE='NO') TRIM(ADJUSTL(slt(i)%name))
+!      do j = 1, num_slv_type
+!         if (j == num_slv_type) then
+!            write(*,"(1X,F15.6)") e_lrc(j, i)
+!         else
+!            write(*,"(1X,F15.6)", ADVANCE='NO') e_lrc(j, i)
+!         end if
+!      end do
+!   end do
+  
+!   write(*,*)
+
+  write(*,*) "Unit: kCal/mol"
   write(*,"(10X)", ADVANCE='NO')
   do i = 1, num_slv_type
     if (i == num_slv_type) then
@@ -158,29 +181,6 @@ PROGRAM elrc
            write(*,"(1X,F15.6)") e_lrc(j, i)
         else
            write(*,"(1X,F15.6)", ADVANCE='NO') e_lrc(j, i)
-        end if
-     end do
-  end do
-  
-  write(*,*)
-
-  write(*,*) "Unit: kCal/mol"
-  write(*,"(10X)", ADVANCE='NO')
-  do i = 1, num_slv_type
-    if (i == num_slv_type) then
-      write(*,"(1X,A15)") TRIM(ADJUSTL(slv(i)%name))
-    else
-      write(*,"(1X,A15)", ADVANCE='NO') TRIM(ADJUSTL(slv(i)%name))
-    end if
-  end do
-
-  do i = 1, num_slt_type
-     write(*,"(A10)", ADVANCE='NO') TRIM(ADJUSTL(slt(i)%name))
-     do j = 1, num_slv_type
-        if (j == num_slv_type) then
-           write(*,"(1X,F15.6)") e_lrc(j, i)/JoulePerCal
-        else
-           write(*,"(1X,F15.6)", ADVANCE='NO') e_lrc(j, i)/JoulePerCal
         end if
      end do
   end do
@@ -227,6 +227,7 @@ CONTAINS
     REAL(KIND=8) :: term3_1, term3_2, term3_3, term3_4
     REAL(KIND=8) :: term4_1, term4_2, term4_3, term4_4    
     REAL(KIND=8) :: const3_0, const3_2, const3_3, const3_4
+    REAL(KIND=8), PARAMETER :: conv_factor = 2.0d0**(-1.0d0/6.0d0)
 
     INTEGER :: i, j
 
@@ -241,7 +242,8 @@ CONTAINS
     e_lrc = 0.
     do i = 1, slv%num_site
        do j = 1, slt%num_site
-          sig = geo_average(slv%lj(1,i), slt%lj(1,j))    
+!          sig = geo_average(slv%lj(1,i), slt%lj(1,j))    
+          sig = conv_factor * (slv%lj(1,i) + slt%lj(1,j))    !for CHARMM
           eps = geo_average(slv%lj(2,i), slt%lj(2,j))
           sig_6 = sig**6
           sig_12 = sig_6 * sig_6
