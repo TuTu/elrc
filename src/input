@@ -1,32 +1,15 @@
+!Units:
+!Lenght = nm, Energy = kJ/mol
 !lj = sigma(nm), epsilon(kJ/mol) 
 
-&general num_slv_type = 2,
-	 num_slt_type = 2,
+&general num_slv_type = 1,
+	 num_slt_type = 3,
 	 r_switch = 0.7,
 	 r_cutoff = 0.75,
 /
 
-&solvent name = "water_tu", num_site = 1, num_density = 32.9845809585 /
+&solvent name = "Water", num_site = 1, num_density = 32.9845809585 /
 &solvent lj = 0.315061, 0.6363864 /
-
-&solvent name = "water_ka", num_site = 1, num_density = 0.0329845809585 /
-&solvent lj = 3.15061, 0.152045 /
-
-&solute name = "alanine_ka", num_site = 5 /
-&solute lj =
-  3.50000, 0.065976,  
-  2.50000, 0.029989,  
-  2.50000, 0.029989,  
-  2.50000, 0.029989,  
-  2.50000, 0.029989, /
-
-&solute name = "alanine_tu", num_site = 5 /
-&solute lj =
-  3.50000e-01, 2.76144e-01,
-  2.50000e-01, 1.25520e-01,
-  2.50000e-01, 1.25520e-01,
-  2.50000e-01, 1.25520e-01,
-  2.50000e-01, 1.25520e-01, /
 
 &solute name = "leucine", num_site = 14 /
 &solute lj =
@@ -61,4 +44,4 @@
 		 0.25, 0.12552,
 		 0.25, 0.12552,
 		 0.25, 0.12552,
-      	   	 0.312,0.71128, /
+   	 0.312,0.71128, /

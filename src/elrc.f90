@@ -20,7 +20,8 @@ PROGRAM elrc
   END INTERFACE
   REAL(KIND=8), PARAMETER :: PI = 3.141592653589793238  
   REAL(KIND=8), PARAMETER :: JoulePerCal = 4.184
-  INTEGER, PARAMETER :: input_fileid = 10
+!  INTEGER, PARAMETER :: input_fileid = 10
+  INTEGER, PARAMETER :: input_fileid = 5 !use stdin as input
   CHARACTER(LEN=128) :: input_filename = "input"
 
   !These variables are just for NAMELIST I/O for TYPE(molecule)
@@ -47,7 +48,8 @@ PROGRAM elrc
 
 
   !----- Start reading parameters from input file -----!
-  open(input_fileid, FILE=input_filename, STATUS='OLD', IOSTAT=stat)
+!  open(input_fileid, FILE=input_filename, STATUS='OLD', IOSTAT=stat)
+  open(input_fileid, IOSTAT=stat)
   if (stat /= 0) then
      write(*,*) 'Error: reading input file "', &
           TRIM(ADJUSTL(input_filename)), '" failed!'
