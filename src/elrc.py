@@ -149,6 +149,11 @@ for file in MolPrm:
     solvent.append(Molecule(slvAtoms))
 
 system = System(pars['volume'], solute, solvent, molNum[1:])
-print(str(system.getElrc(rswitch, rcutoff)))
-
+print('DIR = ' + args.dir)
+print('LOG = ' + args.log.name)
+print('rswitch = ' + str(rswitch))
+print('rcutoff = ' + str(rcutoff))
+print('average volume = ' + str(pars['volume']))
+print('-------------------------------')
+print('elrc = ' + str(system.getElrc(rswitch, rcutoff)))
 
