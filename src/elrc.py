@@ -104,7 +104,7 @@ parser = argparse.ArgumentParser(description='Calculate LJ long-range correction
 #parser.add_argument('-rc', '--rcutoff', type=float, dest='rcutoff', required=True,
 #    help='r_cutoff in nm')
 parser.add_argument('-l', '--log', type=argparse.FileType('r'), required=True,
-    help='Gromacs log file, for obtaining averge volume.')
+    help='Gromacs log file, for obtaining average volume.')
 parser.add_argument('-d', '--dir', default=os.getcwd(),
     help='directory where MDinfo and SltInfo are put (default is current working dir)')
 
