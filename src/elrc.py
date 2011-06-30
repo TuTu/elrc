@@ -73,22 +73,50 @@ class System:
         return elrc
                 
 
+def readGroLog(groLogFile):
+    isAverage = False
+    isVolumeNext = False
+    pars = dict.fromkeys(['volume', 'rswitch', 'rcutoff'])
+    for line in groLogFile:
+        if "rvdw_switch" in line.split():
+            pars['rswitch'] = float(line.split()[2])
+            continue
+        if "rvdw" in line.split():
+            pars['rcutoff'] = float(line.split()[2])
+            continue
+        if "<====  A V E R A G E S  ====>" in line:
+            isAverage = True
+            continue
+        if isAverage and "Volume" in line:
+            isVolumeNext = True
+            idxVolume = line.split().index("Volume")
+            continue
+        if isVolumeNext == True:
+             pars['volume'] = float(line.split()[idxVolume])
+             isVolumeNext = False
+             isAverage = False
+    return pars
+
+
 parser = argparse.ArgumentParser(description='Calculate LJ long-range correction')
-parser.add_argument('rswitch', type=float,
-    help='r_switch in nm')
-parser.add_argument('rcutoff', type=float,
-    help='r_cutoff in nm')
-parser.add_argument('volume', type=float,
-    help='average volume of the system in nm^3')
+#parser.add_argument('-rs', '--rswitch', type=float, dest='rswitch', required=True,
+#    help='r_switch in nm')
+#parser.add_argument('-rc', '--rcutoff', type=float, dest='rcutoff', required=True,
+#    help='r_cutoff in nm')
+parser.add_argument('-l', '--log', type=argparse.FileType('r'), required=True,
+    help='Gromacs log file, for obtaining averge volume.')
 parser.add_argument('-d', '--dir', default=os.getcwd(),
     help='directory where MDinfo and SltInfo are put (default is current working dir)')
 
 args = parser.parse_args()
+pars = readGroLog(args.log)
 
 MDinfo = open(args.dir + "/MDinfo", 'r')
 SltInfo = open(args.dir + "/SltInfo", 'r')
-rswitch = args.rswitch
-rcutoff = args.rcutoff
+rswitch = pars["rswitch"]
+rcutoff = pars["rcutoff"]
+
+
 
 lineCounter = 1
 for line in MDinfo:
@@ -120,7 +148,7 @@ for file in MolPrm:
         slvAtoms.append(Atom(record[0], record[1:3]))
     solvent.append(Molecule(slvAtoms))
 
-system = System(args.volume, solute, solvent, molNum[1:])
+system = System(pars['volume'], solute, solvent, molNum[1:])
 print(str(system.getElrc(rswitch, rcutoff)))
 
 
