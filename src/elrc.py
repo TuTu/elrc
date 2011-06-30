@@ -2,7 +2,7 @@ import argparse
 import os
 import math
 
-#JOULE_PER_CAL = 4.184
+JOULE_PER_CAL = 4.184
 
 class Atom:
     """An atom class"""
@@ -17,11 +17,9 @@ class Atom:
                 'sigma' + str(self.sigma))
 
     def display(self):
-        print('--- start print atom ---')
-        print('charge ' + str(self.charge) + '\n' 
-              'epsilon ' + str(self.epsilon) + '\n'
-              'sigma ' + str(self.sigma))
-        print('--- end print atom ---')
+        print('charge:' + str(self.charge) + ' ' 
+              'epsilon:' + str(self.epsilon) + ' '
+              'sigma:' + str(self.sigma))
 
 #    def __eq__(self, other):
 #        return (self.charge == other.charge and 
@@ -79,16 +77,25 @@ class System:
             slv.display()
         print('***** end print system *****')
 
+    def getElrc_Karino(self, rs, rc):
+        elrc = {}
+        for slv in self.solvent:
+            for slvSite in slv.sites:
+                for sltSite in self.solute.sites:
+                    ep = math.sqrt(slvSite.epsilon * sltSite.epsilon)
+
+
     def getElrc(self, rs, rc):
-        elrc=0.0
+        elrc = {}
+        if rs != rc:
+            C3_0 = (rc**2 - rs**2)**3
+            C3_2 = 3.0 * rs**2 + 3.0 * rc**2
+            C3_3 = 6.0 * rc**2 * rs**2
+            C3_4 = rc**6 - 3.0 * rc**4 * rs**2
+
         for slv in self.solvent:
             C0 = 16.0 * math.pi * self.slvNumDensity[slv]
-            if rs != rc:
-                C3_0 = (rc**2 - rs**2)**3
-                C3_2 = 3.0 * rs**2 + 3.0 * rc**2
-                C3_3 = 6.0 * rc**2 * rs**2
-                C3_4 = rc**6 - 3.0 * rc**4 * rs**2
-
+            elrc[slv] = 0.0
             for slvSite in slv.sites:
                 for sltSite in self.solute.sites:
                     eps = math.sqrt(slvSite.epsilon * sltSite.epsilon)
@@ -103,19 +110,21 @@ class System:
                         term3 = 0.
                         term4 = 0.
                     else:
-                        term3_1 = -2.0 / 3.0 * (1/rc**3 - 1/rs**3)
-                        term3_2 = C3_2 / 5.0 * (1/rc**5 - 1/rs**5)
-                        term3_3 = -C3_3 / 7.0 * (1/rc**7 - 1/rs**7)
-                        term3_4 = -C3_4 / 9.0 * (1/rc**9 - 1/rs**9)
+                        term3_1 = -2.0 / 3.0 * (1./rc**3 - 1./rs**3)
+                        term3_2 = C3_2 / 5.0 * (1./rc**5 - 1./rs**5)
+                        term3_3 = -C3_3 / 7.0 * (1./rc**7 - 1./rs**7)
+                        term3_4 = -C3_4 / 9.0 * (1./rc**9 - 1./rs**9)
                         term3 = -sig_12 / C3_0 * (term3_1 + term3_2 + term3_3 + term3_4)
                          
                         term4_1 = -2.0 / 3.0 * (rc**3 - rs**3)
                         term4_2 = C3_2 * (rc - rs)
                         term4_3 = C3_3 * (1./rc - 1./rs)
-                        term4_4 = C3_4 / 3 * (1./rc**3 - 1./rs**3)
+                        term4_4 = C3_4 / 3.0 * (1./rc**3 - 1./rs**3)
                         term4 = -sig_6 / C3_0 * (term4_1 + term4_2 + term4_3 + term4_4)
                     
-                    elrc += C0 * eps * (term1 + term2 + term3 + term4)
+                    elrc[slv] += eps * (term1 + term2 + term3 + term4)
+            elrc[slv] *= C0 / JOULE_PER_CAL
+        elrc['total'] = sum(list(elrc.values())) 
         return elrc
                 
 
@@ -176,8 +185,7 @@ for line in SltInfo:
 
 solute = Molecule(sltAtoms)
 
-MolPrm = [open("MolPrm"+str(i), 'r') for i in range(1,numTotalType)]
-
+MolPrm = [open(args.dir+"/MolPrm"+str(i), 'r') for i in range(1,numTotalType)]
 solvent = []
 for file in MolPrm:
     slvAtoms = []
@@ -187,15 +195,25 @@ for file in MolPrm:
     solvent.append(Molecule(slvAtoms))
 
 system = System(pars['volume'], solute, solvent, molNum[1:])
-print('DIR = ' + args.dir)
-print('LOG = ' + args.log.name)
+elrc = system.getElrc(pars['rswitch'], pars['rcutoff'])
+
+print()
+print('dir = ' + args.dir)
+print('log = ' + args.log.name)
 print('rswitch = ' + str(pars['rswitch']))
 print('rcutoff = ' + str(pars['rcutoff']))
 print('average volume = ' + str(pars['volume']))
+print('number density (nm^-3):')
+for i in range(len(system.solvent)):
+    print('  solvent %i = ' % int(i+1), system.slvNumDensity[system.solvent[i]])
 print('-------------------------------')
-print('elrc = ' + str(system.getElrc(pars['rswitch'], pars['rcutoff'])))
+print('elrc (kcal/mol): ')
+for i in range(len(system.solvent)):
+    print('  solvent %i = ' % int(i+1), elrc[system.solvent[i]])
+print('  total = ', elrc['total'])
+print()
 
 #debug
-print("\n\n**** debug ****")
-system.display()
+#print("\n\n**** debug ****")
+#system.display()
 

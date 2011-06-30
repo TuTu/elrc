@@ -1,1 +1,6 @@
 Calculate the long-range corrections of LJ energy.
+
+The most complete version is elrc.py (Python version)
+It can now read Gromacs log file together with MDinfo SltInfo and MolPrm files
+to calculate the long-range correction energies of each solvent molecule type
+at once!
