@@ -1,6 +1,9 @@
+#!/home1/kmtu/local/Python-3.2/bin/python3.2
+
 import argparse
 import os
 import math
+import sys
 
 JOULE_PER_CAL = 4.184
 
@@ -128,7 +131,7 @@ class System:
         return elrc
                 
 
-def readGroLog(groLogFile):
+def readGroLog(groLogFile, volume):
     isAverage = False
     isVolumeNext = False
     pars = dict.fromkeys(['volume', 'rswitch', 'rcutoff'])
@@ -150,6 +153,17 @@ def readGroLog(groLogFile):
              pars['volume'] = float(line.split()[idxVolume])
              isVolumeNext = False
              isAverage = False
+    if pars['volume'] == None:
+        if volume == None:
+            sys.exit("Unable to find volume in file: " + str(groLogFile.name) + '\n' +
+                     "If it is an NVT simulation, please input the volume manually, with -v option")
+        else:
+            pars['volume'] = volume
+    else:
+        if volume != None:
+            print("Warning: two sources of volume were provided.")    
+            print("         I choose the value of -v option only: ", volume)
+            pars['volume'] = volume
     return pars
 
 
@@ -158,9 +172,11 @@ parser.add_argument('-l', '--log', type=argparse.FileType('r'), required=True,
     help='Gromacs log file, for obtaining average volume.')
 parser.add_argument('-d', '--dir', default=os.getcwd(),
     help='directory where MDinfo and SltInfo are put (default is current working dir)')
+parser.add_argument('-v', '--volume', type=float, default=None, 
+    help='Volume info for NVT simulations')
 
 args = parser.parse_args()
-pars = readGroLog(args.log)
+pars = readGroLog(args.log, args.volume)
 
 MDinfo = open(args.dir + "/MDinfo", 'r')
 SltInfo = open(args.dir + "/SltInfo", 'r')
