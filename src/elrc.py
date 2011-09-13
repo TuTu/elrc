@@ -172,9 +172,9 @@ for line in MDinfo:
     if lineCounter == 1:
         numTotalType = int(line.split()[1])
     if lineCounter == 2:
-        molNum = [int(line.split()[i]) for i in range(len(line.split()))]
+        molNum = [int(i) for i in line.split()]
     if lineCounter == 3:
-        siteNum = [int(line.split()[i]) for i in range(len(line.split()))]
+        siteNum = [int(i) for i in line.split()]
     lineCounter += 1
 
 lineCounter = 1
