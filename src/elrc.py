@@ -80,6 +80,7 @@ class System:
             slv.display()
         print('***** end print system *****')
 
+    #obsolete (incomplete)
     def getElrc_Karino(self, rs, rc):
         elrc = {}
         for slv in self.solvent:
