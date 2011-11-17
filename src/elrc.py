@@ -183,7 +183,7 @@ MDinfo = open(args.dir + "/MDinfo", 'r')
 SltInfo = open(args.dir + "/SltInfo", 'r')
 
 
-
+#reading MDinfo
 lineCounter = 1
 for line in MDinfo:
     if lineCounter == 1:
@@ -194,6 +194,7 @@ for line in MDinfo:
         siteNum = [int(i) for i in line.split()]
     lineCounter += 1
 
+#reading SltInfo
 lineCounter = 1
 sltAtoms = []
 for line in SltInfo:
@@ -202,6 +203,8 @@ for line in SltInfo:
 
 solute = Molecule(sltAtoms)
 
+
+#reading MolPrm
 MolPrm = [open(args.dir+"/MolPrm"+str(i), 'r') for i in range(1,numTotalType)]
 solvent = []
 for file in MolPrm:
@@ -211,9 +214,13 @@ for file in MolPrm:
         slvAtoms.append(Atom(record[0], record[1:3]))
     solvent.append(Molecule(slvAtoms))
 
+#create System
 system = System(pars['volume'], solute, solvent, molNum[1:])
+
+#calculate long-range correction
 elrc = system.getElrc(pars['rswitch'], pars['rcutoff'])
 
+#output results
 print()
 print('dir = ' + args.dir)
 print('log = ' + args.log.name)
