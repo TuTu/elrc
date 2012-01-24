@@ -81,15 +81,22 @@ class System:
         print('***** end print system *****')
 
     #obsolete (incomplete)
-    def getElrc_Karino(self, rs, rc):
-        elrc = {}
-        for slv in self.solvent:
-            for slvSite in slv.sites:
-                for sltSite in self.solute.sites:
-                    ep = math.sqrt(slvSite.epsilon * sltSite.epsilon)
+#    def getElrc_Karino(self, rs, rc):
+#        elrc = {}
+#        for slv in self.solvent:
+#            for slvSite in slv.sites:
+#                for sltSite in self.solute.sites:
+#                    ep = math.sqrt(slvSite.epsilon * sltSite.epsilon)
 
 
-    def getElrc(self, rs, rc):
+    def getElrc(self, vtype, rs, rc):
+        if vtype == 'Switch':
+            pass
+        elif vtype == 'Cut-off':
+            rs = rc
+        else:    
+            sys.exit("Sorry, the vdwtype = " + vtype + " has not been implemented, yet.\n"
+                     "Currently only vdwtype = Cut-off or Switch is supported")
         elrc = {}
         if rs != rc:
             C3_0 = (rc**2 - rs**2)**3
@@ -137,6 +144,9 @@ def readGroLog(groLogFile, volume):
     isVolumeNext = False
     pars = dict.fromkeys(['volume', 'rswitch', 'rcutoff'])
     for line in groLogFile:
+        if "vdwtype" in line.split():
+            pars['vdwtype'] = float(line.split()[2])
+            continue
         if "rvdw_switch" in line.split():
             pars['rswitch'] = float(line.split()[2])
             continue
@@ -218,7 +228,7 @@ for file in MolPrm:
 system = System(pars['volume'], solute, solvent, molNum[1:])
 
 #calculate long-range correction
-elrc = system.getElrc(pars['rswitch'], pars['rcutoff'])
+elrc = system.getElrc(pars['vdwtype'], pars['rswitch'], pars['rcutoff'])
 
 #output results
 print()
