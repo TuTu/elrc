@@ -145,7 +145,7 @@ def readGroLog(groLogFile, volume):
     pars = dict.fromkeys(['volume', 'rswitch', 'rcutoff'])
     for line in groLogFile:
         if "vdwtype" in line.split():
-            pars['vdwtype'] = float(line.split()[2])
+            pars['vdwtype'] = line.split()[2]
             continue
         if "rvdw_switch" in line.split():
             pars['rswitch'] = float(line.split()[2])
