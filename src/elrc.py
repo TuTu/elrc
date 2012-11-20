@@ -4,6 +4,7 @@ import argparse
 import os
 import math
 import sys
+import codecs
 
 JOULE_PER_CAL = 4.184
 
@@ -179,7 +180,9 @@ def readGroLog(groLogFile, volume):
 
 
 parser = argparse.ArgumentParser(description='Calculate LJ long-range correction')
-parser.add_argument('-l', '--log', type=argparse.FileType('r'), required=True,
+#parser.add_argument('-l', '--log', type=argparse.FileType('r'), required=True,
+#    help='Gromacs log file, for obtaining average volume.')
+parser.add_argument('-l', '--log', required=True,
     help='Gromacs log file, for obtaining average volume.')
 parser.add_argument('-d', '--dir', default=os.getcwd(),
     help='directory where MDinfo and SltInfo are put (default is current working dir)')
@@ -187,7 +190,9 @@ parser.add_argument('-v', '--volume', type=float, default=None,
     help='Volume info for NVT simulations')
 
 args = parser.parse_args()
-pars = readGroLog(args.log, args.volume)
+logFile = codecs.open(args.log, "r", "utf-8")
+#pars = readGroLog(args.log, args.volume)
+pars = readGroLog(logFile, args.volume)
 
 MDinfo = open(args.dir + "/MDinfo", 'r')
 SltInfo = open(args.dir + "/SltInfo", 'r')
@@ -233,7 +238,8 @@ elrc = system.getElrc(pars['vdwtype'], pars['rswitch'], pars['rcutoff'])
 #output results
 print()
 print('dir = ' + args.dir)
-print('log = ' + args.log.name)
+#print('log = ' + args.log.name)
+print('log = ' + args.log)
 print('rswitch = ' + str(pars['rswitch']))
 print('rcutoff = ' + str(pars['rcutoff']))
 print('average volume = ' + str(pars['volume']))
