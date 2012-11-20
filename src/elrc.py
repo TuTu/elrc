@@ -1,4 +1,4 @@
-#!/home1/kmtu/local/Python-3.2/bin/python3.2
+#!/usr/bin/env python3
 
 import argparse
 import os
